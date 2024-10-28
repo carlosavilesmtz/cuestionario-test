@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, X, Upload } from 'lucide-react';
+import { Settings, X, Upload, Sun, Type, Square, Circle, Palette } from 'lucide-react';
 
 const QuizApp = () => {
   const [step, setStep] = useState(0);
@@ -22,6 +21,7 @@ const QuizApp = () => {
     controlsBorderRadius: 8
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('colors');
 
   const questions = [
     {
@@ -35,28 +35,6 @@ const QuizApp = () => {
       type: 'email'
     }
   ];
-
-  const transitions = [
-    {
-      initial: { opacity: 0, x: 100 },
-      animate: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -100 }
-    },
-    {
-      initial: { opacity: 0, y: 100 },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: -100 }
-    },
-    {
-      initial: { opacity: 0, scale: 0.8 },
-      animate: { opacity: 1, scale: 1 },
-      exit: { opacity: 0, scale: 1.2 }
-    }
-  ];
-
-  const getRandomTransition = () => {
-    return transitions[Math.floor(Math.random() * transitions.length)];
-  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -72,6 +50,142 @@ const QuizApp = () => {
     }
   };
 
+  const renderSettingsContent = () => {
+    switch (activeTab) {
+      case 'colors':
+        return (
+          <div className="grid grid-cols-2 gap-2 p-2">
+            <div>
+              <label className="text-xs">Fondo</label>
+              <input
+                type="color"
+                value={settings.backgroundColor}
+                onChange={(e) => setSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+            <div>
+              <label className="text-xs">Tarjeta</label>
+              <input
+                type="color"
+                value={settings.cardBackground}
+                onChange={(e) => setSettings(prev => ({ ...prev, cardBackground: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+          </div>
+        );
+      case 'typography':
+        return (
+          <div className="grid grid-cols-2 gap-2 p-2">
+            <div>
+              <label className="text-xs">Títulos</label>
+              <input
+                type="color"
+                value={settings.titleColor}
+                onChange={(e) => setSettings(prev => ({ ...prev, titleColor: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+            <div>
+              <label className="text-xs">Texto</label>
+              <input
+                type="color"
+                value={settings.textColor}
+                onChange={(e) => setSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+          </div>
+        );
+      case 'buttons':
+        return (
+          <div className="grid grid-cols-2 gap-2 p-2">
+            <div>
+              <label className="text-xs">Fondo botón</label>
+              <input
+                type="color"
+                value={settings.buttonColor}
+                onChange={(e) => setSettings(prev => ({ ...prev, buttonColor: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+            <div>
+              <label className="text-xs">Texto botón</label>
+              <input
+                type="color"
+                value={settings.buttonTextColor}
+                onChange={(e) => setSettings(prev => ({ ...prev, buttonTextColor: e.target.value }))}
+                className="w-full h-6"
+              />
+            </div>
+          </div>
+        );
+      case 'layout':
+        return (
+          <div className="space-y-2 p-2">
+            <div>
+              <label className="text-xs block">Transparencia</label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={settings.cardOpacity}
+                onChange={(e) => setSettings(prev => ({ ...prev, cardOpacity: Number(e.target.value) }))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="text-xs block">Radio bordes</label>
+              <input
+                type="range"
+                min="0"
+                max="32"
+                value={settings.cardBorderRadius}
+                onChange={(e) => setSettings(prev => ({ ...prev, cardBorderRadius: Number(e.target.value) }))}
+                className="w-full"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs">Sombra</label>
+              <input
+                type="checkbox"
+                checked={settings.showShadow}
+                onChange={(e) => setSettings(prev => ({ ...prev, showShadow: e.target.checked }))}
+                className="w-4 h-4"
+              />
+            </div>
+            <div>
+              <label className="text-xs block">Imagen de fondo</label>
+              <div className="flex gap-2">
+                <label className="cursor-pointer px-2 py-1 bg-blue-500 text-white text-xs rounded">
+                  <Upload size={12} className="inline mr-1" />
+                  Subir
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+                {settings.backgroundImage && (
+                  <button
+                    onClick={() => setSettings(prev => ({ ...prev, backgroundImage: null }))}
+                    className="text-red-500 text-xs"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   const handleSubmit = () => {
     console.log('Respuestas:', answers);
     setStep(questions.length + 1);
@@ -80,7 +194,7 @@ const QuizApp = () => {
   const renderStep = () => {
     if (step === 0) {
       return (
-        <motion.div {...getRandomTransition()} className="text-center">
+        <div className="text-center">
           <h1 className="text-4xl font-bold mb-4" style={{ color: settings.titleColor }}>
             ¡Bienvenido a nuestro cuestionario!
           </h1>
@@ -98,26 +212,26 @@ const QuizApp = () => {
           >
             Comenzar
           </button>
-        </motion.div>
+        </div>
       );
     }
 
     if (step > questions.length) {
       return (
-        <motion.div {...getRandomTransition()} className="text-center">
+        <div className="text-center">
           <h1 className="text-4xl font-bold mb-4" style={{ color: settings.titleColor }}>
             ¡Gracias por participar!
           </h1>
           <p className="mb-6" style={{ color: settings.textColor }}>
             Tus respuestas han sido guardadas.
           </p>
-        </motion.div>
+        </div>
       );
     }
 
     const currentQuestion = questions[step - 1];
     return (
-      <motion.div {...getRandomTransition()} className="w-full">
+      <div className="w-full">
         <h2 className="text-2xl font-bold mb-6" style={{ color: settings.titleColor }}>
           {currentQuestion.question}
         </h2>
@@ -154,12 +268,12 @@ const QuizApp = () => {
             {step === questions.length ? 'Enviar' : 'Siguiente'}
           </button>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4 relative"
       style={{
         backgroundColor: settings.backgroundColor,
@@ -168,182 +282,13 @@ const QuizApp = () => {
         backgroundPosition: 'center'
       }}
     >
-      {/* Botón de configuración con z-index */}
-      <button
-        onClick={() => setIsSettingsOpen(true)}
-        style={{ borderRadius: `${settings.controlsBorderRadius}px` }}
-        className="fixed top-4 right-4 p-2 bg-white z-50 shadow-lg"
-      >
-        <Settings size={24} />
-      </button>
-
-      {/* Panel de configuración con z-index y versión móvil */}
-      <AnimatePresence>
-        {isSettingsOpen && (
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            className="fixed right-0 top-0 h-full bg-white shadow-lg overflow-y-auto z-50 w-full sm:w-80"
-          >
-            <div className="sticky top-0 bg-white p-4 border-b z-10">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">Configuración</h3>
-                <button
-                  onClick={() => setIsSettingsOpen(false)}
-                  className="p-1 hover:bg-gray-100 rounded-full"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-3">
-              {/* Versión compacta de los controles */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Color de fondo y tarjeta */}
-                <div>
-                  <label className="block text-xs font-medium mb-1">Color fondo</label>
-                  <input
-                    type="color"
-                    value={settings.backgroundColor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Color tarjeta</label>
-                  <input
-                    type="color"
-                    value={settings.cardBackground}
-                    onChange={(e) => setSettings(prev => ({ ...prev, cardBackground: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-              </div>
-
-              {/* Transparencia y bordes en una fila */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1">Transparencia</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={settings.cardOpacity}
-                    onChange={(e) => setSettings(prev => ({ ...prev, cardOpacity: e.target.value }))}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Radio bordes</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="32"
-                    value={settings.cardBorderRadius}
-                    onChange={(e) => setSettings(prev => ({ ...prev, cardBorderRadius: Number(e.target.value) }))}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Colores de texto en una fila */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1">Color títulos</label>
-                  <input
-                    type="color"
-                    value={settings.titleColor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, titleColor: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Color texto</label>
-                  <input
-                    type="color"
-                    value={settings.textColor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, textColor: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-              </div>
-
-              {/* Colores de botones en una fila */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1">Color botones</label>
-                  <input
-                    type="color"
-                    value={settings.buttonColor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, buttonColor: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Texto botones</label>
-                  <input
-                    type="color"
-                    value={settings.buttonTextColor}
-                    onChange={(e) => setSettings(prev => ({ ...prev, buttonTextColor: e.target.value }))}
-                    className="w-full h-8"
-                  />
-                </div>
-              </div>
-
-              {/* Controles adicionales */}
-              <div className="flex items-center justify-between py-2">
-                <label className="text-xs font-medium">Mostrar sombra</label>
-                <input
-                  type="checkbox"
-                  checked={settings.showShadow}
-                  onChange={(e) => setSettings(prev => ({ ...prev, showShadow: e.target.checked }))}
-                  className="w-4 h-4"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium mb-1">Imagen de fondo</label>
-                <div className="flex items-center gap-2">
-                  <label 
-                    className="cursor-pointer px-3 py-1.5 bg-blue-500 text-white text-sm"
-                    style={{ borderRadius: `${settings.controlsBorderRadius}px` }}
-                  >
-                    <Upload size={14} className="inline mr-1" />
-                    Subir
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                  </label>
-                  {settings.backgroundImage && (
-                    <button
-                      onClick={() => setSettings(prev => ({ ...prev, backgroundImage: null }))}
-                      className="text-red-500 text-sm"
-                    >
-                      Eliminar
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Contenido principal con z-index ajustado */}
       <div
-        className={`w-full max-w-4xl p-8 ${settings.showShadow ? 'shadow-xl' : ''} relative z-0`}
+        className={`w-full max-w-4xl p-8 ${settings.showShadow ? 'shadow-xl' : ''}`}
         style={{
           backgroundColor: `${settings.cardBackground}${Math.round(settings.cardOpacity * 255).toString(16).padStart(2, '0')}`,
           borderRadius: `${settings.cardBorderRadius}px`
         }}
       >
-        {/* Header del gimnasio */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <img 
@@ -372,7 +317,6 @@ const QuizApp = () => {
           </div>
         </div>
 
-        {/* Barra de progreso */}
         <div 
           className="w-full h-2 bg-gray-200 mb-8"
           style={{ borderRadius: `${settings.controlsBorderRadius}px` }}
@@ -387,18 +331,66 @@ const QuizApp = () => {
           />
         </div>
 
-        {/* Contenido del formulario */}
         <div className="relative">
           {renderStep()}
-          <style jsx global>{`
-            input {
-              border-bottom-color: ${settings.buttonColor} !important;
-            }
-            input:focus {
-              border-bottom-color: ${settings.buttonColor} !important;
-            }
-          `}</style>
         </div>
+      </div>
+
+      {/* Menú flotante inferior */}
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+        <div 
+          className="bg-white rounded-full shadow-lg p-2 flex items-center gap-2"
+          style={{ borderRadius: `${settings.controlsBorderRadius}px` }}
+        >
+          <button
+            onClick={() => {
+              setIsSettingsOpen(!isSettingsOpen);
+              setActiveTab('colors');
+            }}
+            className={`p-2 rounded-full ${isSettingsOpen ? 'bg-gray-100' : ''}`}
+          >
+            <Settings size={20} />
+          </button>
+          
+          {isSettingsOpen && (
+            <>
+              <button
+                onClick={() => setActiveTab('colors')}
+                className={`p-2 rounded-full ${activeTab === 'colors' ? 'bg-gray-100' : ''}`}
+              >
+                <Palette size={20} />
+              </button>
+              <button
+                onClick={() => setActiveTab('typography')}
+                className={`p-2 rounded-full ${activeTab === 'typography' ? 'bg-gray-100' : ''}`}
+              >
+                <Type size={20} />
+              </button>
+              <button
+                onClick={() => setActiveTab('buttons')}
+                className={`p-2 rounded-full ${activeTab === 'buttons' ? 'bg-gray-100' : ''}`}
+              >
+                <Circle size={20} />
+              </button>
+              <button
+                onClick={() => setActiveTab('layout')}
+                className={`p-2 rounded-full ${activeTab === 'layout' ? 'bg-gray-100' : ''}`}
+              >
+                <Square size={20} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Panel de configuración */}
+        {isSettingsOpen && (
+          <div 
+            className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg w-72"
+            style={{ borderRadius: `${settings.controlsBorderRadius}px` }}
+          >
+            {renderSettingsContent()}
+          </div>
+        )}
       </div>
     </div>
   );
